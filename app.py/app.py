@@ -9,22 +9,36 @@ st.set_page_config(page_title="คลังพร้อม", page_icon="📦", l
 st.markdown(
     """
     <style>
-    .stApp { background-color: #0F1E1A; color: #F3EFE4; }
+    .stApp { background-color: #FFFFFF; color: #1B3A2B; }
+    section[data-testid="stSidebar"] {
+        background-color: #F1F8F0;
+        border-right: 1px solid #D9EDD9;
+    }
     div[data-testid="stMetric"] {
-        background-color: #15271F;
-        border: 1px solid #2A4038;
-        border-radius: 4px;
+        background-color: #F1F8F0;
+        border: 1px solid #D9EDD9;
+        border-radius: 8px;
         padding: 14px 16px;
     }
-    div[data-testid="stMetricLabel"] { color: #93AA9C; }
-    div[data-testid="stMetricValue"] { color: #F3EFE4; }
+    div[data-testid="stMetricLabel"] { color: #4B7A5C; }
+    div[data-testid="stMetricValue"] { color: #1B3A2B; }
+    div[data-testid="stMetricDelta"] { color: #2F9E44; }
     .stButton>button {
-        background-color: #C9A227;
-        color: #1B1608;
+        background-color: #2F9E44;
+        color: #FFFFFF;
         border: none;
+        border-radius: 6px;
         font-weight: 600;
     }
-    .stDataFrame { background-color: #15271F; }
+    .stButton>button:hover { background-color: #257A37; color: #FFFFFF; }
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #FAFDF9;
+        border: 1px solid #D9EDD9 !important;
+        border-radius: 8px;
+    }
+    .stDataFrame { border: 1px solid #D9EDD9; border-radius: 8px; }
+    h1, h2, h3, h4 { color: #1B3A2B; }
+    p, span, label, .stCaption { color: #4B5F55 !important; }
     </style>
     """,
     unsafe_allow_html=True,
@@ -114,7 +128,7 @@ if page == "ภาพรวม":
 
     st.markdown("#### แนวโน้ม Food Waste ต่อเดือน (% ของสต๊อกที่ทิ้ง)")
     st.caption("เทียบก่อนและหลังเริ่มใช้ระบบในเดือนพฤษภาคม")
-    st.line_chart(WASTE_TREND, color=["#93AA9C", "#C9A227"])
+    st.line_chart(WASTE_TREND, color=["#B8CFC0", "#2F9E44"])
 
 # ---------------------------------------------------------------------------
 # Page: PO reconciliation
@@ -162,4 +176,3 @@ else:
                 if st.button(label, key=f"btn_{e['id']}"):
                     st.session_state.promoted[e["id"]] = not is_promoted
                     st.rerun()
-
