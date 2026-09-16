@@ -36,7 +36,7 @@ st.markdown(
         border: 1px solid #D9EDD9 !important;
         border-radius: 8px;
     }
-    .stDataFrame { border: 1px solid #D9EDD9; border-radius: 8px; }
+    .stDataFrame, div[data-testid="stDataEditor"] { border: 1px solid #D9EDD9; border-radius: 8px; }
     h1, h2, h3, h4 { color: #1B3A2B; }
     p, span, label, .stCaption { color: #4B5F55 !important; }
     </style>
@@ -45,24 +45,31 @@ st.markdown(
 )
 
 # ---------------------------------------------------------------------------
-# Mock data — institutional kitchens (hospital, prison, school)
+# Starting data — kept in session_state so it can be edited live in the app.
+# NOTE: this resets when the app reboots/redeploys (Streamlit Cloud does not
+# keep a database by default). Use the download/upload buttons at the bottom
+# of each page to save your work and load it back next time.
 # ---------------------------------------------------------------------------
-PO_ROWS = pd.DataFrame(
-    [
-        {"วัตถุดิบ": "ข้าวสาร (กก.)", "หน่วยงาน": "โรงพยาบาลรัฐ (ครัวกลาง)", "สั่ง (PO)": 500, "คงเหลือจริง": 210, "เบิกใช้เฉลี่ย/รอบ": 340, "สถานะ": "สั่งเกิน"},
-        {"วัตถุดิบ": "ไข่ไก่ (แผง)", "หน่วยงาน": "เรือนจำกลาง", "สั่ง (PO)": 300, "คงเหลือจริง": 40, "เบิกใช้เฉลี่ย/รอบ": 260, "สถานะ": "สั่งขาด"},
-        {"วัตถุดิบ": "นมกล่อง UHT (ลัง)", "หน่วยงาน": "โรงเรียนประจำ", "สั่ง (PO)": 200, "คงเหลือจริง": 130, "เบิกใช้เฉลี่ย/รอบ": 70, "สถานะ": "สั่งเกิน"},
-        {"วัตถุดิบ": "ผักรวม (กก.)", "หน่วยงาน": "โรงพยาบาลรัฐ (ครัวกลาง)", "สั่ง (PO)": 150, "คงเหลือจริง": 12, "เบิกใช้เฉลี่ย/รอบ": 145, "สถานะ": "ใกล้เคียงการเบิกใช้จริง"},
-        {"วัตถุดิบ": "เนื้อหมู (กก.)", "หน่วยงาน": "เรือนจำกลาง", "สั่ง (PO)": 220, "คงเหลือจริง": 95, "เบิกใช้เฉลี่ย/รอบ": 110, "สถานะ": "สั่งเกิน"},
-        {"วัตถุดิบ": "ซอสปรุงรส (ขวด)", "หน่วยงาน": "โรงเรียนประจำ", "สั่ง (PO)": 60, "คงเหลือจริง": 45, "เบิกใช้เฉลี่ย/รอบ": 20, "สถานะ": "สั่งเกิน"},
-    ]
-)
+if "po_df" not in st.session_state:
+    st.session_state.po_df = pd.DataFrame(
+        [
+            {"วัตถุดิบ": "ข้าวสาร (กก.)", "หน่วยงาน": "โรงพยาบาลรัฐ (ครัวกลาง)", "สั่ง (PO)": 500, "คงเหลือจริง": 210, "เบิกใช้เฉลี่ย/รอบ": 340},
+            {"วัตถุดิบ": "ไข่ไก่ (แผง)", "หน่วยงาน": "เรือนจำกลาง", "สั่ง (PO)": 300, "คงเหลือจริง": 40, "เบิกใช้เฉลี่ย/รอบ": 260},
+            {"วัตถุดิบ": "นมกล่อง UHT (ลัง)", "หน่วยงาน": "โรงเรียนประจำ", "สั่ง (PO)": 200, "คงเหลือจริง": 130, "เบิกใช้เฉลี่ย/รอบ": 70},
+            {"วัตถุดิบ": "ผักรวม (กก.)", "หน่วยงาน": "โรงพยาบาลรัฐ (ครัวกลาง)", "สั่ง (PO)": 150, "คงเหลือจริง": 12, "เบิกใช้เฉลี่ย/รอบ": 145},
+            {"วัตถุดิบ": "เนื้อหมู (กก.)", "หน่วยงาน": "เรือนจำกลาง", "สั่ง (PO)": 220, "คงเหลือจริง": 95, "เบิกใช้เฉลี่ย/รอบ": 110},
+            {"วัตถุดิบ": "ซอสปรุงรส (ขวด)", "หน่วยงาน": "โรงเรียนประจำ", "สั่ง (PO)": 60, "คงเหลือจริง": 45, "เบิกใช้เฉลี่ย/รอบ": 20},
+        ]
+    )
 
-EXPIRY_SEED = [
-    {"id": "e1", "item": "นมกล่อง UHT", "branch": "โรงเรียนประจำ", "days_left": 2, "qty": 45, "unit": "ลัง", "discount": 25, "base_value": 13500},
-    {"id": "e2", "item": "เนื้อหมู", "branch": "เรือนจำกลาง", "days_left": 1, "qty": 60, "unit": "กก.", "discount": 30, "base_value": 10800},
-    {"id": "e3", "item": "ผักรวม", "branch": "โรงพยาบาลรัฐ (ครัวกลาง)", "days_left": 1, "qty": 38, "unit": "กก.", "discount": 20, "base_value": 3040},
-]
+if "expiry_df" not in st.session_state:
+    st.session_state.expiry_df = pd.DataFrame(
+        [
+            {"รายการ": "นมกล่อง UHT", "หน่วยงาน": "โรงเรียนประจำ", "จำนวน": 45, "หน่วย": "ลัง", "วันคงเหลือ": 2, "ส่วนลดแนะนำ (%)": 25, "มูลค่าตั้งต้น (บาท)": 13500, "สร้างโปรโมชั่นแล้ว": False},
+            {"รายการ": "เนื้อหมู", "หน่วยงาน": "เรือนจำกลาง", "จำนวน": 60, "หน่วย": "กก.", "วันคงเหลือ": 1, "ส่วนลดแนะนำ (%)": 30, "มูลค่าตั้งต้น (บาท)": 10800, "สร้างโปรโมชั่นแล้ว": False},
+            {"รายการ": "ผักรวม", "หน่วยงาน": "โรงพยาบาลรัฐ (ครัวกลาง)", "จำนวน": 38, "หน่วย": "กก.", "วันคงเหลือ": 1, "ส่วนลดแนะนำ (%)": 20, "มูลค่าตั้งต้น (บาท)": 3040, "สร้างโปรโมชั่นแล้ว": False},
+        ]
+    )
 
 WASTE_TREND = pd.DataFrame(
     {
@@ -72,24 +79,23 @@ WASTE_TREND = pd.DataFrame(
     }
 ).set_index("เดือน")
 
-STATUS_COLOR = {
-    "สั่งเกิน": "🔴",
-    "สั่งขาด": "🟠",
-    "ใกล้เคียงการเบิกใช้จริง": "🟢",
-}
 
-# ---------------------------------------------------------------------------
-# Session state for the promotion demo
-# ---------------------------------------------------------------------------
-if "promoted" not in st.session_state:
-    st.session_state.promoted = {}
+def calc_status(po, stock, used):
+    if used <= 0:
+        return "ไม่มีข้อมูลเบิกใช้"
+    if po > used * 1.3:
+        return "🔴 สั่งเกิน"
+    if stock < used * 0.5:
+        return "🟠 สั่งขาด"
+    return "🟢 ใกล้เคียงการเบิกใช้จริง"
 
-def recovered_revenue():
-    total = 0
-    for e in EXPIRY_SEED:
-        if st.session_state.promoted.get(e["id"]):
-            total += e["base_value"] * (1 - e["discount"] / 100)
-    return total
+
+def recovered_revenue(df: pd.DataFrame) -> float:
+    promoted = df[df["สร้างโปรโมชั่นแล้ว"] == True]  # noqa: E712
+    if promoted.empty:
+        return 0.0
+    return (promoted["มูลค่าตั้งต้น (บาท)"] * (1 - promoted["ส่วนลดแนะนำ (%)"] / 100)).sum()
+
 
 # ---------------------------------------------------------------------------
 # Sidebar navigation
@@ -105,6 +111,10 @@ st.sidebar.info(
     "เดโมสำหรับกลุ่ม **โรงพยาบาล โรงเรียน และเรือนจำ** — "
     "หน่วยงานที่มีโรงครัวขนาดใหญ่และสั่งวัตถุดิบปริมาณมากต่อรอบ"
 )
+st.sidebar.caption(
+    "⚠️ ข้อมูลที่คีย์ในหน้านี้เก็บไว้เฉพาะระหว่างที่แอปยังไม่รีสตาร์ท "
+    "ให้กดดาวน์โหลด CSV เก็บไว้ทุกครั้งหลังแก้ไข"
+)
 
 # ---------------------------------------------------------------------------
 # Page: Overview
@@ -113,66 +123,107 @@ if page == "ภาพรวม":
     st.title("ภาพรวมระบบ")
     st.caption("สรุปผลตั้งแต่เริ่มใช้ระบบเทียบ PO กับสต๊อกจริงและระบบแจ้งเตือนวัตถุดิบใกล้หมดอายุ")
 
-    over_count = (PO_ROWS["สถานะ"] == "สั่งเกิน").sum()
-    revenue = recovered_revenue()
+    po_df = st.session_state.po_df
+    expiry_df = st.session_state.expiry_df
+
+    status_series = po_df.apply(
+        lambda r: calc_status(r["สั่ง (PO)"], r["คงเหลือจริง"], r["เบิกใช้เฉลี่ย/รอบ"]), axis=1
+    )
+    over_count = status_series.str.contains("สั่งเกิน").sum()
+    revenue = recovered_revenue(expiry_df)
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Food waste ที่ลดได้", "71%", "ลดจาก 18.9% เหลือ 5.4%")
-    c2.metric("ความแม่นยำของ PO", "89%", "เทียบย้อนหลัง 6 เดือน")
+    c1.metric("Food waste ที่ลดได้", "71%", "ลดจาก 18.9% เหลือ 5.4% (ข้อมูลอ้างอิง)")
+    c2.metric("จำนวนวัตถุดิบที่ติดตามอยู่", f"{len(po_df)} SKU")
     c3.metric(
         "รายได้จากโปรโมชั่น Resale",
-        f"{revenue:,.0f} บาท/เดือน",
-        "จากรายการที่กดสร้างโปรโมชั่นแล้ว" if revenue else "ยังไม่มีการสร้างโปรโมชั่น",
+        f"{revenue:,.0f} บาท",
+        "จากรายการที่ติ๊กสร้างโปรโมชั่นแล้ว" if revenue else "ยังไม่มีการสร้างโปรโมชั่น",
     )
     c4.metric("รายการสั่งเกินตอนนี้", f"{over_count} SKU", "ควรปรับปริมาณรอบถัดไป", delta_color="inverse")
 
     st.markdown("#### แนวโน้ม Food Waste ต่อเดือน (% ของสต๊อกที่ทิ้ง)")
-    st.caption("เทียบก่อนและหลังเริ่มใช้ระบบในเดือนพฤษภาคม")
+    st.caption("ข้อมูลอ้างอิงสำหรับสาธิต — เทียบก่อนและหลังเริ่มใช้ระบบ")
     st.line_chart(WASTE_TREND, color=["#B8CFC0", "#2F9E44"])
 
 # ---------------------------------------------------------------------------
-# Page: PO reconciliation
+# Page: PO reconciliation — editable
 # ---------------------------------------------------------------------------
 elif page == "เทียบใบสั่งซื้อกับสต๊อกจริง":
     st.title("เทียบใบสั่งซื้อ (PO) กับสต๊อกจริง")
     st.caption(
-        "ระบบเทียบปริมาณที่สั่งกับสต๊อกคงเหลือจริงและปริมาณเบิกใช้เฉลี่ยของแต่ละหน่วยงาน "
-        "เพื่อชี้ว่ารายการไหนสั่งเกินหรือสั่งขาด"
+        "แก้ไขตัวเลขในตารางได้โดยตรง กดที่แถวว่างล่างสุดเพื่อเพิ่มวัตถุดิบใหม่ "
+        "หรือติ๊กเลือกแถวแล้วกดถังขยะเพื่อลบ"
     )
-    display_df = PO_ROWS.copy()
-    display_df["สถานะ"] = display_df["สถานะ"].apply(lambda s: f"{STATUS_COLOR.get(s, '')} {s}")
-    st.dataframe(display_df, use_container_width=True, hide_index=True)
-    st.caption("รอบ PO ถัดไป ระบบจะแนะนำปรับปริมาณสั่งซื้ออัตโนมัติตามปริมาณเบิกใช้เฉลี่ยที่สะสมไว้")
+
+    edited = st.data_editor(
+        st.session_state.po_df,
+        num_rows="dynamic",
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "สั่ง (PO)": st.column_config.NumberColumn(min_value=0, step=1),
+            "คงเหลือจริง": st.column_config.NumberColumn(min_value=0, step=1),
+            "เบิกใช้เฉลี่ย/รอบ": st.column_config.NumberColumn(min_value=0, step=1),
+        },
+        key="po_editor",
+    )
+    st.session_state.po_df = edited
+
+    st.markdown("#### ผลวิเคราะห์อัตโนมัติ")
+    result_df = edited.copy()
+    result_df["สถานะ"] = result_df.apply(
+        lambda r: calc_status(r["สั่ง (PO)"], r["คงเหลือจริง"], r["เบิกใช้เฉลี่ย/รอบ"]), axis=1
+    )
+    st.dataframe(result_df, use_container_width=True, hide_index=True)
+
+    st.download_button(
+        "⬇️ ดาวน์โหลดข้อมูล PO เป็น CSV",
+        edited.to_csv(index=False).encode("utf-8-sig"),
+        file_name="po_data.csv",
+        mime="text/csv",
+    )
+    uploaded = st.file_uploader("⬆️ อัปโหลด CSV เพื่อโหลดข้อมูลเดิมกลับมา", type="csv", key="po_upload")
+    if uploaded is not None:
+        st.session_state.po_df = pd.read_csv(uploaded)
+        st.rerun()
 
 # ---------------------------------------------------------------------------
-# Page: Expiry & resale
+# Page: Expiry & resale — editable
 # ---------------------------------------------------------------------------
 else:
     st.title("วัตถุดิบใกล้หมดอายุ & โปรโมชั่นอัตโนมัติ")
-    st.caption("กดสร้างโปรโมชั่นเพื่อจำลองการแปลงวัตถุดิบใกล้หมดอายุให้เป็นรายได้ก่อนที่จะถูกทิ้ง")
+    st.caption(
+        "เพิ่ม/แก้ไขรายการวัตถุดิบใกล้หมดอายุในตาราง แล้วติ๊กช่อง "
+        "'สร้างโปรโมชั่นแล้ว' เพื่อจำลองการแปลงเป็นรายได้"
+    )
 
-    for e in EXPIRY_SEED:
-        is_promoted = st.session_state.promoted.get(e["id"], False)
-        recovered = e["base_value"] * (1 - e["discount"] / 100)
+    edited = st.data_editor(
+        st.session_state.expiry_df,
+        num_rows="dynamic",
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "จำนวน": st.column_config.NumberColumn(min_value=0, step=1),
+            "วันคงเหลือ": st.column_config.NumberColumn(min_value=0, step=1),
+            "ส่วนลดแนะนำ (%)": st.column_config.NumberColumn(min_value=0, max_value=100, step=5),
+            "มูลค่าตั้งต้น (บาท)": st.column_config.NumberColumn(min_value=0, step=100),
+            "สร้างโปรโมชั่นแล้ว": st.column_config.CheckboxColumn(),
+        },
+        key="expiry_editor",
+    )
+    st.session_state.expiry_df = edited
 
-        with st.container(border=True):
-            col1, col2, col3 = st.columns([3, 1.3, 1.4])
-            with col1:
-                st.markdown(f"**{e['item']} · {e['qty']} {e['unit']}**")
-                urgency = "🔴" if e["days_left"] <= 1 else "🟠"
-                st.caption(
-                    f"{e['branch']} — เหลืออีก {urgency} {e['days_left']} วัน ก่อนหมดอายุ · "
-                    f"มูลค่าตั้งต้น {e['base_value']:,} บาท"
-                )
-            with col2:
-                if is_promoted:
-                    st.markdown(f"**+{recovered:,.0f} บาท**")
-                    st.caption("กู้คืนเป็นรายได้แล้ว")
-                else:
-                    st.markdown(f"**ลด {e['discount']}%**")
-                    st.caption("ส่วนลดที่ระบบแนะนำ")
-            with col3:
-                label = "ยกเลิกโปรโมชั่น" if is_promoted else "✨ สร้างโปรโมชั่นอัตโนมัติ"
-                if st.button(label, key=f"btn_{e['id']}"):
-                    st.session_state.promoted[e["id"]] = not is_promoted
-                    st.rerun()
+    revenue = recovered_revenue(edited)
+    st.metric("รวมรายได้ที่กู้คืนจากโปรโมชั่น", f"{revenue:,.0f} บาท")
+
+    st.download_button(
+        "⬇️ ดาวน์โหลดข้อมูลใกล้หมดอายุเป็น CSV",
+        edited.to_csv(index=False).encode("utf-8-sig"),
+        file_name="expiry_data.csv",
+        mime="text/csv",
+    )
+    uploaded = st.file_uploader("⬆️ อัปโหลด CSV เพื่อโหลดข้อมูลเดิมกลับมา", type="csv", key="expiry_upload")
+    if uploaded is not None:
+        st.session_state.expiry_df = pd.read_csv(uploaded)
+        st.rerun()
